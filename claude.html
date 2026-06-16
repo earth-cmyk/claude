@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Local For You POS — Your Entire Restaurant, Managed on One Screen.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16140F;
+    --ink-soft:#403B31;
+    --paper:#F7F4ED;
+    --surface:#FFFFFF;
+    --sand:#E9E2D2;
+    --line:#DED6C4;
+    --ember:#EF4F26;
+    --ember-deep:#C93A14;
+    --herb:#1C8A5B;
+    --herb-soft:#E4F0E6;
+    --amber:#F2A93B;
+
+    --maxw:1180px;
+    --r:16px;
+    --r-lg:26px;
+    --shadow:0 1px 0 rgba(22,20,15,.04), 0 18px 44px -22px rgba(22,20,15,.30);
+    --shadow-sm:0 8px 22px -16px rgba(22,20,15,.4);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:1.02;letter-spacing:-.02em}
+  .mono{font-family:'JetBrains Mono',monospace}
+
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ember-deep);
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"";width:18px;height:1.5px;background:var(--ember);display:inline-block}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:16px;
+    padding:15px 26px;border-radius:999px;cursor:pointer;border:1.5px solid transparent;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--ember);color:#fff;box-shadow:var(--shadow-sm)}
+  .btn-primary:hover{background:var(--ember-deep);transform:translateY(-2px)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--ink);transform:translateY(-2px)}
+  .btn-arrow{transition:transform .2s ease}
+  .btn:hover .btn-arrow{transform:translateX(3px)}
+
+  /* Nav */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(247,244,237,.82);backdrop-filter:saturate(140%) blur(12px);
+    border-bottom:1px solid transparent;transition:border-color .3s ease, background .3s ease;
+  }
+  nav.scrolled{border-bottom-color:var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;letter-spacing:-.02em}
+  .brand .dot{
+    width:30px;height:30px;border-radius:9px;background:var(--ink);
+    display:grid;place-items:center;color:var(--paper);font-size:13px;
+    position:relative;flex:none;
+  }
+  .brand .dot::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:var(--ember);right:-2px;top:-2px;border:2px solid var(--paper)}
+  .brand .tag{font-family:'JetBrains Mono';font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--ember-deep);border:1px solid var(--line);padding:2px 7px;border-radius:6px;align-self:center}
+  .nav-links{display:flex;align-items:center;gap:30px}
+  .nav-links a{font-size:15px;color:var(--ink-soft);font-weight:500;transition:color .15s}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-cta{display:flex;align-items:center;gap:14px}
+  .nav-cta .btn{padding:11px 20px;font-size:15px}
+  .menu-btn{display:none;background:none;border:1px solid var(--line);border-radius:10px;padding:9px;cursor:pointer}
+
+  /* Hero */
+  .hero{padding:64px 0 40px;position:relative}
+  .hero-grid{display:grid;grid-template-columns:1.04fr 1fr;gap:54px;align-items:center}
+  .hero h1{font-size:clamp(40px,5.6vw,68px);margin:20px 0 0}
+  .hero h1 .hl{color:var(--ember);position:relative;white-space:nowrap}
+  .hero p.sub{font-size:19px;color:var(--ink-soft);margin:22px 0 0;max-width:30em}
+  .hero-cta{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+  .hero-meta{display:flex;gap:22px;margin-top:26px;flex-wrap:wrap}
+  .hero-meta div{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-soft)}
+  .hero-meta svg{flex:none}
+
+  /* Signature: the one screen */
+  .screen{
+    background:var(--ink);border-radius:var(--r-lg);padding:16px;
+    box-shadow:var(--shadow);position:relative;
+    border:1px solid #2a261d;
+  }
+  .screen-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 14px}
+  .screen-bar .left{display:flex;align-items:center;gap:8px}
+  .screen-dots{display:flex;gap:6px}
+  .screen-dots i{width:9px;height:9px;border-radius:50%;display:block;background:#41392c}
+  .screen-title{font-family:'JetBrains Mono';font-size:11px;color:#9c9282;letter-spacing:.08em}
+  .live{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono';font-size:10px;color:#7fd6a6;letter-spacing:.1em}
+  .live .blip{width:7px;height:7px;border-radius:50%;background:var(--herb);box-shadow:0 0 0 0 rgba(28,138,91,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,214,166,.5)}70%{box-shadow:0 0 0 7px rgba(127,214,166,0)}100%{box-shadow:0 0 0 0 rgba(127,214,166,0)}}
+
+  .tickets{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ticket{
+    background:#211d16;border:1px solid #342e23;border-radius:12px;padding:11px 12px;
+    border-left:3px solid var(--amber);
+    opacity:0;transform:translateY(8px);
+    animation:slidein .5s ease forwards;
+  }
+  .ticket.g{border-left-color:var(--herb)}
+  .ticket.r{border-left-color:var(--ember)}
+  .ticket.b{border-left-color:#5b9bd5}
+  .ticket:nth-child(1){animation-delay:.15s}
+  .ticket:nth-child(2){animation-delay:.32s}
+  .ticket:nth-child(3){animation-delay:.49s}
+  .ticket:nth-child(4){animation-delay:.66s}
+  @keyframes slidein{to{opacity:1;transform:translateY(0)}}
+  .ticket .row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+  .chan{font-family:'JetBrains Mono';font-size:9.5px;font-weight:600;letter-spacing:.06em;padding:2px 7px;border-radius:5px;text-transform:uppercase}
+  .chan.dine{background:rgba(242,169,59,.16);color:#f2c074}
+  .chan.qr{background:rgba(91,155,213,.16);color:#9bc2e6}
+  .chan.grab{background:rgba(28,138,91,.18);color:#7fd6a6}
+  .chan.line{background:rgba(28,138,91,.18);color:#7fd6a6}
+  .chan.shopee{background:rgba(239,79,38,.18);color:#ffa285}
+  .tnum{font-family:'JetBrains Mono';font-size:11px;color:#cbb9a0}
+  .titem{font-size:12.5px;color:#e8e0d2;font-weight:500;line-height:1.35}
+  .tmeta{font-family:'JetBrains Mono';font-size:10px;color:#8a8070;margin-top:6px;display:flex;justify-content:space-between}
+  .tmeta .ok{color:#7fd6a6}
+  .screen-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:11px 6px 4px;border-top:1px solid #2c2820}
+  .screen-foot .stat{font-family:'JetBrains Mono';font-size:11px;color:#9c9282}
+  .screen-foot .stat b{color:#fff;font-weight:600}
+  .float-badge{
+    position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:10px 13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:9px;
+  }
+  .float-badge .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .float-badge .txt b{display:block;font-size:13px;font-family:'Bricolage Grotesque';font-weight:700}
+  .float-badge .txt span{font-size:11px;color:var(--ink-soft)}
+  .fb-1{bottom:-22px;left:-26px;animation:bob 5s ease-in-out infinite}
+  .fb-2{top:34px;right:-30px;animation:bob 5.5s ease-in-out infinite .4s}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+  /* Logos / trust strip */
+  .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0;margin-top:46px}
+  .strip-inner{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center}
+  .strip-label{font-family:'JetBrains Mono';font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .pill-ch{font-family:'JetBrains Mono';font-size:13px;font-weight:500;color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:7px 15px;background:var(--surface)}
+
+  /* Sections */
+  section{padding:88px 0}
+  .sec-head{max-width:640px}
+  .sec-head h2{font-size:clamp(30px,4vw,46px);margin:16px 0 0}
+  .sec-head p{font-size:18px;color:var(--ink-soft);margin-top:16px}
+  .center{margin-left:auto;margin-right:auto;text-align:center}
+
+  /* Problem */
+  .problem{background:var(--ink);color:var(--paper)}
+  .problem .eyebrow{color:#ffa285}
+  .problem .eyebrow::before{background:var(--ember)}
+  .problem .sec-head h2{color:var(--paper)}
+  .problem .sec-head p{color:#b6ad9d}
+  .chaos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}
+  .chaos-card{background:#211d16;border:1px solid #34301f;border-radius:var(--r);padding:26px}
+  .chaos-card .n{font-family:'JetBrains Mono';font-size:12px;color:#7a7263;letter-spacing:.1em}
+  .chaos-card h3{font-size:20px;margin:14px 0 8px;color:var(--paper)}
+  .chaos-card p{font-size:15px;color:#aaa294;line-height:1.55}
+  .turn{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:48px;flex-wrap:wrap;text-align:center}
+  .turn .line{font-family:'Bricolage Grotesque';font-weight:600;font-size:clamp(20px,2.6vw,28px);color:var(--paper)}
+  .turn .line b{color:var(--ember)}
+
+  /* Solution / aggregation */
+  .solve-grid{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;margin-top:14px}
+  .funnel{position:relative;display:flex;flex-direction:column;gap:10px}
+  .src-row{display:flex;gap:10px;flex-wrap:wrap}
+  .src{
+    flex:1;min-width:130px;display:flex;align-items:center;gap:10px;
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 14px;box-shadow:var(--shadow-sm);
+  }
+  .src .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:13px;font-weight:700;font-family:'Bricolage Grotesque';color:#fff}
+  .src .nm{font-size:14px;font-weight:600}
+  .src .sm{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft)}
+  .arrows{display:flex;justify-content:center;color:var(--ember);font-size:24px;line-height:1}
+  .one-box{
+    background:var(--ink);color:#fff;border-radius:var(--r);padding:22px 24px;text-align:center;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .one-box .lbl{font-family:'JetBrains Mono';font-size:11px;color:#7fd6a6;letter-spacing:.14em;text-transform:uppercase}
+  .one-box .big{font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;margin-top:6px}
+  .solve-list{list-style:none;display:flex;flex-direction:column;gap:18px;margin-top:26px}
+  .solve-list li{display:flex;gap:14px;align-items:flex-start}
+  .solve-list .check{width:26px;height:26px;border-radius:8px;background:var(--herb-soft);color:var(--herb);display:grid;place-items:center;flex:none;margin-top:2px}
+  .solve-list h4{font-family:'Bricolage Grotesque';font-size:17px;font-weight:600}
+  .solve-list p{font-size:14.5px;color:var(--ink-soft);margin-top:2px}
+
+  /* Features */
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:50px}
+  .feat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px;transition:transform .18s ease, box-shadow .18s ease}
+  .feat:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .feat .ic{width:46px;height:46px;border-radius:12px;background:var(--paper);border:1px solid var(--line);display:grid;place-items:center;margin-bottom:16px;color:var(--ember-deep)}
+  .feat .k{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);letter-spacing:.08em}
+  .feat h3{font-size:19px;margin:8px 0 8px}
+  .feat p{font-size:14.5px;color:var(--ink-soft);line-height:1.55}
+  .feat ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:6px}
+  .feat ul li{font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:center}
+  .feat ul li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ember);flex:none}
+
+  /* Ordering pills band */
+  .order-band{background:var(--herb);color:#fff}
+  .order-band .sec-head h2,.order-band .eyebrow{color:#fff}
+  .order-band .eyebrow{color:#d6f0e0}
+  .order-band .eyebrow::before{background:#fff}
+  .order-band .sec-head p{color:#d8f0e1}
+  .opills{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
+  .opill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:12px 20px;font-weight:600;font-size:15px;display:flex;align-items:center;gap:9px}
+  .opill .d{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.85}
+
+  /* How it works */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:50px;counter-reset:s}
+  .step{position:relative;padding-top:18px}
+  .step .num{font-family:'Bricolage Grotesque';font-weight:800;font-size:54px;color:var(--sand);line-height:1}
+  .step h3{font-size:21px;margin:6px 0 10px}
+  .step p{font-size:15px;color:var(--ink-soft)}
+  .step .when{font-family:'JetBrains Mono';font-size:12px;color:var(--ember-deep);margin-top:12px;display:inline-block;border:1px solid var(--line);border-radius:7px;padding:3px 9px}
+
+  /* Why us */
+  .why{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:48px}
+  .why-card{padding:30px;border-radius:var(--r);background:var(--paper);border:1px solid var(--line)}
+  .why-card.hi{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .why-card .badge{width:48px;height:48px;border-radius:13px;background:var(--ember);color:#fff;display:grid;place-items:center;margin-bottom:18px}
+  .why-card.hi .badge{background:var(--herb)}
+  .why-card h3{font-size:22px;margin-bottom:10px}
+  .why-card p{font-size:15px;color:var(--ink-soft)}
+  .why-card.hi p{color:#c4bcad}
+
+  /* Pricing */
+  .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:50px;align-items:stretch}
+  .plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px 22px;display:flex;flex-direction:column}
+  .plan.feature{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:var(--shadow);transform:translateY(-8px)}
+  .plan .pname{font-family:'Bricolage Grotesque';font-weight:600;font-size:18px}
+  .plan .tagline{font-size:13px;color:var(--ink-soft);margin-top:4px;min-height:34px}
+  .plan.feature .tagline{color:#bdb5a6}
+  .plan .price{font-family:'Bricolage Grotesque';font-weight:800;font-size:40px;margin:16px 0 0;letter-spacing:-.03em}
+  .plan .price span{font-size:15px;font-weight:500;color:var(--ink-soft);font-family:'Inter'}
+  .plan.feature .price span{color:#bdb5a6}
+  .plan .flag{display:inline-block;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--ember);color:#fff;padding:4px 10px;border-radius:999px;margin-bottom:12px;width:max-content}
+  .plan ul{list-style:none;margin:18px 0 22px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .plan ul li{font-size:14px;display:flex;gap:9px;align-items:flex-start;color:var(--ink-soft)}
+  .plan.feature ul li{color:#cfc8ba}
+  .plan ul li svg{flex:none;margin-top:3px;color:var(--herb)}
+  .plan.feature ul li svg{color:#7fd6a6}
+  .plan .btn{width:100%}
+  .plan.feature .btn-ghost{border-color:#46402f;color:#fff}
+  .plan.feature .btn-ghost:hover{border-color:#fff}
+  .price-note{text-align:center;font-size:14px;color:var(--ink-soft);margin-top:26px}
+  .price-note b{color:var(--ink)}
+
+  /* Testimonials */
+  .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}
+  .quote{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+  .quote .stars{color:var(--amber);letter-spacing:2px;font-size:14px}
+  .quote p{font-size:15.5px;margin:14px 0 18px;line-height:1.55}
+  .quote .who{display:flex;align-items:center;gap:11px}
+  .quote .av{width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:700;flex:none}
+  .quote .who b{font-size:14px;display:block;font-family:'Bricolage Grotesque'}
+  .quote .who span{font-size:12.5px;color:var(--ink-soft)}
+
+  /* FAQ */
+  .faq{max-width:780px;margin:46px auto 0}
+  details{border-bottom:1px solid var(--line);padding:6px 0}
+  summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 4px;font-family:'Bricolage Grotesque';font-weight:600;font-size:18px}
+  summary::-webkit-details-marker{display:none}
+  summary .plus{width:26px;height:26px;flex:none;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;transition:transform .2s ease;color:var(--ember-deep)}
+  details[open] summary .plus{transform:rotate(45deg)}
+  details p{padding:0 4px 22px;color:var(--ink-soft);font-size:15.5px;max-width:64ch}
+
+  /* Final CTA */
+  .final{background:var(--ember);color:#fff;border-radius:var(--r-lg);padding:64px 40px;text-align:center;position:relative;overflow:hidden}
+  .final::before,.final::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.10)}
+  .final::before{width:320px;height:320px;top:-140px;right:-80px}
+  .final::after{width:260px;height:260px;bottom:-150px;left:-60px}
+  .final h2{font-size:clamp(30px,4.4vw,48px);position:relative}
+  .final p{font-size:19px;margin:16px auto 0;max-width:34em;opacity:.95;position:relative}
+  .final .btns{display:flex;gap:14px;justify-content:center;margin-top:30px;flex-wrap:wrap;position:relative}
+  .final .btn-primary{background:#fff;color:var(--ember-deep)}
+  .final .btn-primary:hover{background:var(--ink);color:#fff}
+  .final .btn-ghost{border-color:rgba(255,255,255,.5);color:#fff}
+  .final .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.12)}
+  .final small{display:block;margin-top:18px;font-family:'JetBrains Mono';font-size:12px;letter-spacing:.06em;opacity:.85;position:relative}
+
+  /* Footer */
+  footer{padding:60px 0 40px}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px;padding-bottom:36px;border-bottom:1px solid var(--line)}
+  .foot-grid p{font-size:14px;color:var(--ink-soft);margin-top:14px;max-width:30ch}
+  .foot-col h4{font-family:'JetBrains Mono';font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
+  .foot-col a{display:block;font-size:14.5px;color:var(--ink-soft);padding:5px 0;transition:color .15s}
+  .foot-col a:hover{color:var(--ink)}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--ink-soft)}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:980px){
+    .hero-grid,.solve-grid{grid-template-columns:1fr;gap:40px}
+    .chaos,.feat-grid,.why-grid,.quotes,.steps{grid-template-columns:1fr 1fr}
+    .price-grid{grid-template-columns:1fr 1fr}
+    .plan.feature{transform:none}
+    .foot-grid{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}
+  }
+  @media(max-width:620px){
+    body{font-size:16px}
+    section{padding:64px 0}
+    .chaos,.feat-grid,.why-grid,.quotes,.steps,.price-grid,.foot-grid{grid-template-columns:1fr}
+    .nav-cta .btn-ghost{display:none}
+    .hero{padding:40px 0 20px}
+    .float-badge{display:none}
+    .final{padding:48px 22px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .reveal{opacity:1;transform:none}
+    .ticket{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="brand">
+      <span class="dot">L</span> Local For You <span class="tag">POS</span>
+    </a>
+    <div class="nav-links">
+      <a href="#problem">The problem</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#pricing" class="btn btn-ghost">See pricing</a>
+      <a href="#start" class="btn btn-primary">Start now <span class="btn-arrow">→</span></a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Restaurant POS &amp; ordering system</span>
+      <h1>Your entire restaurant, managed on <span class="hl">one screen.</span></h1>
+      <p class="sub">Dine-in, QR, pickup, delivery and every food app — pulled into a single screen you can run from your phone, tablet or counter. No more juggling five tablets and a stack of paper tickets.</p>
+      <div class="hero-cta">
+        <a href="#start" class="btn btn-primary">Start your restaurant <span class="btn-arrow">→</span></a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
+      </div>
+      <div class="hero-meta">
+        <div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C8A5B" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          Live in 24 hours
+        </div>
+        <div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C8A5B" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          Thai support 24/7
+        </div>
+        <div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C8A5B" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          No paper tickets
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNATURE: the one screen -->
+    <div style="position:relative">
+      <div class="screen">
+        <div class="screen-bar">
+          <div class="left">
+            <div class="screen-dots"><i></i><i></i><i></i></div>
+            <span class="screen-title">LFY — All Orders</span>
+          </div>
+          <span class="live"><span class="blip"></span>LIVE</span>
+        </div>
+        <div class="tickets">
+          <div class="ticket">
+            <div class="row1"><span class="chan dine">Dine-in</span><span class="tnum">#A-12 · T7</span></div>
+            <div class="titem">Pad Thai Goong ×2 · Tom Yum</div>
+            <div class="tmeta"><span>Kitchen</span><span class="ok">● cooking</span></div>
+          </div>
+          <div class="ticket b">
+            <div class="row1"><span class="chan qr">QR table</span><span class="tnum">#Q-08 · T3</span></div>
+            <div class="titem">Green Curry · Jasmine Rice ×2</div>
+            <div class="tmeta"><span>Paid online</span><span class="ok">● new</span></div>
+          </div>
+          <div class="ticket g">
+            <div class="row1"><span class="chan grab">Grab</span><span class="tnum">#G-441</span></div>
+            <div class="titem">Massaman Beef · Spring Rolls</div>
+            <div class="tmeta"><span>Rider 6 min</span><span class="ok">● accepted</span></div>
+          </div>
+          <div class="ticket r">
+            <div class="row1"><span class="chan shopee">ShopeeFood</span><span class="tnum">#S-209</span></div>
+            <div class="titem">Mango Sticky Rice ×3</div>
+            <div class="tmeta"><span>Pickup 6:40</span><span class="ok">● ready</span></div>
+          </div>
+        </div>
+        <div class="screen-foot">
+          <span class="stat">Open orders <b>14</b></span>
+          <span class="stat">Today <b>$1,847</b></span>
+          <span class="stat">Avg ticket <b>$32</b></span>
+        </div>
+      </div>
+
+      <div class="float-badge fb-1">
+        <span class="ic" style="background:var(--herb-soft);color:var(--herb)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+        </span>
+        <span class="txt"><b>One inbox</b><span>Grab · Lineman · Shopee</span></span>
+      </div>
+      <div class="float-badge fb-2">
+        <span class="ic" style="background:rgba(239,79,38,.12);color:var(--ember-deep)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
+        </span>
+        <span class="txt"><b>Kitchen Display</b><span>Straight to the chef</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- trust strip -->
+  <div class="wrap">
+    <div class="strip">
+      <div class="strip-inner">
+        <span class="strip-label">Brings every channel together:</span>
+        <span class="pill-ch">Dine-in</span>
+        <span class="pill-ch">QR ordering</span>
+        <span class="pill-ch">Grab</span>
+        <span class="pill-ch">Lineman</span>
+        <span class="pill-ch">ShopeeFood</span>
+        <span class="pill-ch">Uber Direct</span>
+        <span class="pill-ch">Online &amp; pickup</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section class="problem" id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Sound familiar?</span>
+      <h2>Running a restaurant shouldn't mean running between five screens.</h2>
+      <p>Most kitchens lose money not on the food, but in the gap between channels — missed app orders, mistyped totals, and tickets that never reach the chef.</p>
+    </div>
+    <div class="chaos">
+      <div class="chaos-card reveal">
+        <div class="n">01</div>
+        <h3>A tablet for every app</h3>
+        <p>Grab here, Lineman there, ShopeeFood on its own stand. Someone has to watch them all — and orders still slip through during the rush.</p>
+      </div>
+      <div class="chaos-card reveal">
+        <div class="n">02</div>
+        <h3>Paper tickets get lost</h3>
+        <p>Handwritten dockets pile up at the pass, smudge, and disappear. The chef cooks the wrong table; the customer waits and walks.</p>
+      </div>
+      <div class="chaos-card reveal">
+        <div class="n">03</div>
+        <h3>No idea what's actually working</h3>
+        <p>You feel busy, but you can't see your best sellers, your slow hours, or whether today beat last Tuesday — so pricing is a guess.</p>
+      </div>
+    </div>
+    <div class="turn reveal">
+      <span class="line">Local For You turns all of it into <b>one calm screen.</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">The fix</span>
+      <h2>Every order, every channel, on a single screen.</h2>
+      <p>Order Aggregation pulls all your delivery apps and in-house orders into one live view. Your staff work one screen — not five tablets — so nothing gets missed.</p>
+    </div>
+    <div class="solve-grid">
+      <div class="funnel reveal">
+        <div class="src-row">
+          <div class="src"><span class="ic" style="background:var(--amber)">D</span><div><div class="nm">Dine-in</div><div class="sm">tables &amp; QR</div></div></div>
+          <div class="src"><span class="ic" style="background:var(--herb)">G</span><div><div class="nm">Grab</div><div class="sm">delivery app</div></div></div>
+        </div>
+        <div class="src-row">
+          <div class="src"><span class="ic" style="background:#1C8A5B">L</span><div><div class="nm">Lineman</div><div class="sm">delivery app</div></div></div>
+          <div class="src"><span class="ic" style="background:var(--ember)">S</span><div><div class="nm">ShopeeFood</div><div class="sm">delivery app</div></div></div>
+        </div>
+        <div class="src-row">
+          <div class="src"><span class="ic" style="background:#5b9bd5">W</span><div><div class="nm">Your website</div><div class="sm">online &amp; pickup</div></div></div>
+          <div class="src"><span class="ic" style="background:var(--ink)">U</span><div><div class="nm">Uber Direct</div><div class="sm">your own riders</div></div></div>
+        </div>
+        <div class="arrows">↓ ↓ ↓</div>
+        <div class="one-box">
+          <div class="lbl">Local For You · One Screen</div>
+          <div class="big">Every order, one place.</div>
+        </div>
+      </div>
+
+      <div>
+        <ul class="solve-list">
+          <li class="reveal">
+            <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <div><h4>Kitchen Display System</h4><p>Orders fly straight to the chefs the second they land — printed by station, so steak, fryer and salad each get their own ticket.</p></div>
+          </li>
+          <li class="reveal">
+            <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <div><h4>Run it from anywhere</h4><p>Phone, tablet or counter. Check every branch, change a price, or 86 a sold-out dish in one click — without opening a computer.</p></div>
+          </li>
+          <li class="reveal">
+            <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <div><h4>Real-time menu &amp; stock</h4><p>Update menus instantly with no restart. Stock counts down as you sell and warns you before you run out mid-service.</p></div>
+          </li>
+          <li class="reveal">
+            <span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <div><h4>Payments that reconcile themselves</h4><p>Card and QR payments are read and receipted automatically — no typing totals, far fewer mistakes at the till.</p></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="background:var(--paper)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Everything in the box</span>
+      <h2>One system for the whole operation.</h2>
+      <p>Front of house, kitchen, stock, staff and reporting — built to work together instead of five tools that don't talk to each other.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 8h10M7 12h6M8 21h8"/></svg></div>
+        <span class="k">CORE</span>
+        <h3>Kitchen &amp; menu control</h3>
+        <p>Tickets to the chef, menus you edit in seconds, and stock that tracks itself.</p>
+        <ul><li>Kitchen Display System</li><li>Menu management</li><li>Inventory &amp; low-stock alerts</li></ul>
+      </div>
+      <div class="feat reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 15h18"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg></div>
+        <span class="k">ORDERING</span>
+        <h3>Order the way they want</h3>
+        <p>Eight ways to order, all landing on the same screen — and every food app merged into one.</p>
+        <ul><li>QR, table, online, pickup</li><li>Dine-in &amp; delivery</li><li>Order aggregation &amp; reservations</li></ul>
+      </div>
+      <div class="feat reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+        <span class="k">PAYMENTS</span>
+        <h3>Connected checkout</h3>
+        <p>Linked to your card machine and banking, so payments verify and receipt automatically.</p>
+        <ul><li>Card &amp; QR integrations</li><li>Auto-reconciled receipts</li><li>No manual totals</li></ul>
+      </div>
+      <div class="feat reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <span class="k">STAFF &amp; ADMIN</span>
+        <h3>Manage your team</h3>
+        <p>Set who can do what, and see exactly when everyone clocked in and out.</p>
+        <ul><li>Role-based permissions per branch</li><li>Clock-in / clock-out tracking</li><li>Owner-only sales &amp; void access</li></ul>
+      </div>
+      <div class="feat reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+        <span class="k">ANALYTICS</span>
+        <h3>See where the money is</h3>
+        <p>Daily, weekly, monthly and yearly sales in plain charts — plus best sellers and your busiest hours. Export to CSV anytime.</p>
+        <ul><li>Reporting &amp; analytics</li><li>Dynamic / happy-hour pricing</li><li>Discounts &amp; service charges</li></ul>
+      </div>
+      <div class="feat reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6l9 4 9-4V7"/></svg></div>
+        <span class="k">GROWTH</span>
+        <h3>Bring customers back</h3>
+        <p>Reward regulars, run unlimited promos and combo deals, and manage every branch from one account.</p>
+        <ul><li>Loyalty &amp; CRM</li><li>Unlimited promos &amp; combos</li><li>Multi-location management</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORDERING BAND -->
+<section class="order-band" id="ordering">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Ordering options</span>
+      <h2>Eight ways to take an order. One screen to manage them.</h2>
+      <p>Let customers choose how they order — and never split your attention across devices again.</p>
+    </div>
+    <div class="opills">
+      <span class="opill reveal"><span class="d"></span>Dine-in</span>
+      <span class="opill reveal"><span class="d"></span>QR code at the table</span>
+      <span class="opill reveal"><span class="d"></span>Table ordering</span>
+      <span class="opill reveal"><span class="d"></span>Online ordering</span>
+      <span class="opill reveal"><span class="d"></span>Pickup</span>
+      <span class="opill reveal"><span class="d"></span>Delivery</span>
+      <span class="opill reveal"><span class="d"></span>Reservations</span>
+      <span class="opill reveal"><span class="d"></span>Order aggregation</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Getting started</span>
+      <h2>From sign-up to serving — in a day.</h2>
+      <p>We set it up with you. You don't need to be technical, and you don't need to leave your kitchen.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="num">1</div>
+        <h3>Tell us about your shop</h3>
+        <p>Pick your package, send us your menu and branches. Our Thai-speaking team handles the heavy lifting and builds your setup for you.</p>
+        <span class="when">Day 1</span>
+      </div>
+      <div class="step reveal">
+        <div class="num">2</div>
+        <h3>We get you live</h3>
+        <p>Your ordering page and POS go live on a Local For You sub-domain — or your own — and we connect your delivery apps and payments.</p>
+        <span class="when">Within 24 hours</span>
+      </div>
+      <div class="step reveal">
+        <div class="num">3</div>
+        <h3>Run everything on one screen</h3>
+        <p>Take orders, update menus and watch your sales from your phone. Hit a snag? We remote in over Windows and fix it on the spot.</p>
+        <span class="when">From the first service</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why" id="why">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Why Local For You</span>
+      <h2>Built for real kitchens, backed by real people.</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card hi reveal">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+        <h3>All on one screen</h3>
+        <p>Orders, kitchen, payments, stock and reports in a single live view you can run from your phone, tablet or counter — no five-tablet circus.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><path d="M21 4v5h-5"/></svg></div>
+        <h3>Windows-based remote support</h3>
+        <p>When something breaks mid-service, we remote straight into your system and fix it — no waiting, no "send us a screenshot."</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Thai support, 24/7</h3>
+        <p>A real Thai-speaking team on live chat in the panel, day or night. Ask a question and get a person — not a ticket number.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:var(--paper)">
+  <div class="wrap">
+    <div class="sec-head center reveal" style="margin:0 auto">
+      <span class="eyebrow" style="justify-content:center">Simple pricing</span>
+      <h2>Pick the package that fits your shop.</h2>
+      <p>Straightforward monthly pricing. Start with the POS, add online ordering when you're ready, or get everything plus hardware.</p>
+    </div>
+    <div class="price-grid">
+      <div class="plan reveal">
+        <div class="pname">POS Only</div>
+        <div class="tagline">The full front-of-house system for one shop.</div>
+        <div class="price">$69<span>/mo</span></div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Kitchen Display System</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Menu, stock &amp; payments</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Staff, reports &amp; analytics</li>
+        </ul>
+        <a href="#start" class="btn btn-ghost">Choose POS</a>
+      </div>
+
+      <div class="plan reveal">
+        <div class="pname">Online Ordering</div>
+        <div class="tagline">Your own ordering page and delivery channels.</div>
+        <div class="price">$199<span>/mo</span></div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Online &amp; QR ordering page</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Order aggregation</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Promos, combos &amp; loyalty</li>
+        </ul>
+        <a href="#start" class="btn btn-ghost">Choose ordering</a>
+      </div>
+
+      <div class="plan feature reveal">
+        <span class="flag">Most popular</span>
+        <div class="pname">POS + Online Ordering</div>
+        <div class="tagline">Front of house and online, working as one.</div>
+        <div class="price">$249<span>/mo</span></div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Everything in POS</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Everything in Online Ordering</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> One screen, every channel</li>
+        </ul>
+        <a href="#start" class="btn btn-primary">Start now →</a>
+      </div>
+
+      <div class="plan reveal">
+        <div class="pname">Everything + Hardware</div>
+        <div class="tagline">The full kit, with the terminal included.</div>
+        <div class="price">$299<span>/mo</span></div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> POS + Online Ordering</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Hardware terminal included</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Free router extension</li>
+        </ul>
+        <a href="#start" class="btn btn-ghost">Get the full kit</a>
+      </div>
+    </div>
+    <p class="price-note reveal"><b>Everything + Hardware</b> is a 24-month contract and includes a free router extension. Not sure which fits? <a href="#start" style="color:var(--ember-deep);font-weight:600">Talk to our team</a> and we'll recommend one.</p>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (placeholder copy — replace with real client quotes) -->
+<section id="loved">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">From the floor</span>
+      <h2>Owners who stopped juggling tablets.</h2>
+      <p>Replace these with your real customer quotes before you publish.</p>
+    </div>
+    <div class="quotes">
+      <div class="quote reveal">
+        <div class="stars">★★★★★</div>
+        <p>"We used to run three tablets at the pass during dinner. Now it's one screen and the chef just cooks. Orders stopped getting lost overnight."</p>
+        <div class="who"><span class="av">M</span><div><b>Malee's Thai Kitchen</b><span>Thai restaurant · Sydney</span></div></div>
+      </div>
+      <div class="quote reveal">
+        <div class="stars">★★★★★</div>
+        <p>"Setup took less than a day and the team did it with me over the phone — in Thai. When I had a problem on a Friday night, they remoted in and fixed it in minutes."</p>
+        <div class="who"><span class="av">S</span><div><b>Som Tam House</b><span>Casual dining · Melbourne</span></div></div>
+      </div>
+      <div class="quote reveal">
+        <div class="stars">★★★★★</div>
+        <p>"For the first time I can actually see my best sellers and my quiet hours. We changed our happy-hour pricing because of it and weekday sales went up."</p>
+        <div class="who"><span class="av">A</span><div><b>Aroy Dee Express</b><span>Takeaway · Brisbane</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background:var(--paper)">
+  <div class="wrap">
+    <div class="sec-head center reveal" style="margin:0 auto">
+      <span class="eyebrow" style="justify-content:center">Questions</span>
+      <h2>Good to know before you start.</h2>
+    </div>
+    <div class="faq">
+      <details class="reveal" open>
+        <summary>How quickly can I go live? <span class="plus">+</span></summary>
+        <p>Most shops are live within 24 hours. We build your ordering page and POS on a Local For You sub-domain straight away — and you can connect your own domain whenever you're ready.</p>
+      </details>
+      <details class="reveal">
+        <summary>Do I need to be technical to use it? <span class="plus">+</span></summary>
+        <p>No. Our team sets it up with you and runs you through it. The whole point of "one screen" is that anyone on your floor can use it without training — and our Thai-speaking support is on live chat 24/7 if you get stuck.</p>
+      </details>
+      <details class="reveal">
+        <summary>Which delivery apps does it connect to? <span class="plus">+</span></summary>
+        <p>Order aggregation brings Grab, Lineman and ShopeeFood into one screen, alongside your own online, QR and dine-in orders. For your own riders, the POS connects with Uber Direct.</p>
+      </details>
+      <details class="reveal">
+        <summary>Can I manage more than one branch? <span class="plus">+</span></summary>
+        <p>Yes. Manage every location from a single account, set different staff roles per branch, and check sales across all of them from your phone.</p>
+      </details>
+      <details class="reveal">
+        <summary>What does online payment cost? <span class="plus">+</span></summary>
+        <p>Online transactions are charged at 1.75% + $0.30 per order, settled directly to you — no separate payment account to manage. Your card and QR payments at the counter reconcile and receipt automatically.</p>
+      </details>
+      <details class="reveal">
+        <summary>What's included with the hardware package? <span class="plus">+</span></summary>
+        <p>The $299/mo Everything + Hardware plan includes the terminal and a free router extension, on a 24-month contract. The other packages are software-only and month to month.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="start">
+  <div class="wrap">
+    <div class="final reveal">
+      <h2>Bring your whole restaurant onto one screen.</h2>
+      <p>Get set up in 24 hours with a team that speaks your language. Start today and run your next service without the tablet juggle.</p>
+      <div class="btns">
+        <a href="#" class="btn btn-primary">Start your restaurant →</a>
+        <a href="#pricing" class="btn btn-ghost">Compare packages</a>
+      </div>
+      <small>Live in 24 hours · Thai support 24/7 · Windows remote help</small>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a href="#" class="brand"><span class="dot">L</span> Local For You <span class="tag">POS</span></a>
+        <p>Your entire restaurant, managed on one screen. POS, ordering and delivery — together at last.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#ordering">Ordering options</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#how">How it works</a>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <a href="#why">Why Local For You</a>
+        <a href="#loved">Customers</a>
+        <a href="#faq">FAQ</a>
+        <a href="#start">Get started</a>
+      </div>
+      <div class="foot-col">
+        <h4>Support</h4>
+        <a href="#start">Live chat 24/7</a>
+        <a href="#start">Remote help</a>
+        <a href="#start">Contact us</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Local For You. All rights reserved.</span>
+      <span class="mono">One screen. Every order.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // nav shadow on scroll
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // reveal on scroll
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
